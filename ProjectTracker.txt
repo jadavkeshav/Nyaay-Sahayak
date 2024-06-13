@@ -1,0 +1,37 @@
+we went through the problem statement and searched for requirements
+researched on any data set available that can be used to solve queries
+discussed and designed basic layout of how our website will look like
+researched on html 
+worked on html for our website 
+researched and learned Css 
+worked on Css for our website
+worked on bootstrap
+added bootstrap to the html css
+added basic javascript for the website
+researched on node and react
+converted html css to react
+worked on routings in react
+discussed on what are the unique features to be added
+understood how a chatbot is created and what is the purpose of its
+worked on react-chatbot-kit module to add a chatbot into the website
+understood how the response should be given by the chatbot, improved it to a basic level
+worked on voice assistant using python
+searched for node modules that can help our voice assistant
+worked on speech recognition module in node 
+created a basic structure for voice assistant
+worked on displaying the text spoken by the user 
+worked on frontend to enhance the website
+created a sample json datasets which had questions and answers
+worked on displaying the answer for the question asked by the user
+worked on show the answer for the question with maximum matching words match by the question in the JsonData
+worked to create a good UI with voice assistant
+worked on different pages of our webiste
+gone through the express documentation
+understood the express boiler plate and got a backend server working
+understood about the thunderclient
+tried to create a initial endpoint 
+understood mongo
+explored and understood how a database is created in mongo DB Atlas
+connected the mongoDb with the express server
+tried to display the data in DB in a particular endpoint
+
