@@ -10,7 +10,7 @@ const ProfileCard = (props) => {
         if (isConfirmed) {
             
         try {
-            const response = await fetch('http://localhost:4000/api/user', {
+            const response = await fetch(process.env.REACT_APP_SERVER_URL+'/api/user', {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',

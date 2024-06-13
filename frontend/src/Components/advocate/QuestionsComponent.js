@@ -28,7 +28,7 @@ export default function QuestionsComponent(props) {
     if (isConfirmed) {
       try {
         const question = jsonData.question
-        const response = await fetch('http://localhost:4000/data', {
+        const response = await fetch(process.env.REACT_APP_SERVER_URL+'/data', {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
@@ -50,7 +50,7 @@ export default function QuestionsComponent(props) {
     try {
       handleModalClose();
       const questionId = props.jsonData._id;
-      const response = await fetch('http://localhost:4000/data', {
+      const response = await fetch(process.env.REACT_APP_SERVER_URL+'/data', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

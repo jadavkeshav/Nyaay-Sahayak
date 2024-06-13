@@ -31,7 +31,7 @@ function App() {
     setLoading(true);
     const fetchData = async () => { 
       try {
-        const response = await fetch('http://localhost:4000/data');
+        const response = await fetch(process.env.REACT_APP_SERVER_URL+ "/data");
         const json = await response.json();
         if (response.ok) {
           setJsonData(json);

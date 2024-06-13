@@ -12,7 +12,7 @@ export default function AdminDasboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('http://localhost:4000/api/getusers');
+        const response = await fetch(process.env.REACT_APP_SERVER_URL+'/api/getusers');
         const json = await response.json();
         setLoading(true);
         if (response.ok) {

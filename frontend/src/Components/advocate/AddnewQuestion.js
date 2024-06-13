@@ -31,7 +31,7 @@ export default function AddnewQuestion(props) {
             if (question === '' || answer === '') {
                 toast.error("All Fields must be filled")
             } else {
-                const response = await fetch('http://localhost:4000/data', {
+                const response = await fetch(process.env.REACT_APP_SERVER_URL+'/data', {
                     method: 'POST',
                     headers: {
                         "Content-Type": "application/json",
