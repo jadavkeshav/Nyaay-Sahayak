@@ -12,7 +12,7 @@ const app = express();
 
 app.use(cors({
   credentials: true,
-  origin: 'https://nyaaysahayak.netlify.app/,
+  origin: "https://nyaaysahayak.netlify.app/",
 }));
 
 app.use(bodyParser.json());
