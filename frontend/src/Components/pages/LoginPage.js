@@ -14,7 +14,7 @@ const LoginPage = () => {
         if (email === '' || password === '') {
             toast.error("All Fields must be filled");
         } else {
-            const response = await fetch('http://localhost:4000/api/login', {
+            const response = await fetch(process.env.REACT_APP_SERVER_URL+'/api/login', {
                 method: 'POST',
                 headers: {
                     "Content-Type": "application/json",
