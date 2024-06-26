@@ -12,7 +12,7 @@ const app = express();
 
 app.use(cors({
   credentials: true,
-  origin: 'https://nyaaysahayak.vercel.app/',
+  origin: 'https://nyaay-sahayak.vercel.app',
 }));
 
 app.use(bodyParser.json());
