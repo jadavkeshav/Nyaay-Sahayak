@@ -26,7 +26,7 @@ const LoginPage = () => {
             const data = await response.json();
             if (data.token) {
                 const token = data.token;
-                const testResponse = await fetch('http://localhost:4000/test', {
+                const testResponse = await fetch(process.env.REACT_APP_SERVER_URL+'/test', {
                     method: 'GET',
                     headers: {
                         "Content-Type": "application/json",
