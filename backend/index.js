@@ -12,7 +12,9 @@ const app = express();
 
 app.use(cors({
   credentials: true,
-  origin: 'https://nyaay-sahayak.vercel.app',
+  // origin: 'https://nyaay-sahayak.vercel.app',
+  origin: 'http://localhost:3000',
+  
 }));
 
 app.use(bodyParser.json());

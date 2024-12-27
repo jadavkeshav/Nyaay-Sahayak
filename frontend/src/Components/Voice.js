@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import char from '../Components/images/char.png';
+import stringSimilarity from "string-similarity";
 import { useSpeechSynthesis } from 'react-speech-kit';
 
 export default function VoiceAssistant(props) {
@@ -9,12 +10,72 @@ export default function VoiceAssistant(props) {
   const [repeatButton, setRepeatButton] = useState(true);
   const [inputSource, setInputSource] = useState('voice');
 
+
+
   useEffect(() => {
-    // console.log("Input Source:", inputSource);
-    if (inputSource === 'voice' || inputSource === 'voice1') { // Speak only if input was voice
+    if (inputSource === 'voice' || inputSource === 'voice1') { 
       speak({ text: mytranscript });
     }
   }, [inputSource]);
+
+  async function generateAnswer(question) {
+    const apiKey = process.env.REACT_APP_API_KEY; 
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: `Provide a concise response based on Indian laws for the following query: "${question}" .If the query is irrelavent or Indian law cannot be applied on it or any other reason of invalid question then in response say 'Can you please explain your query in detail so that I can generate a response for you' something like this in a polite and friendly manner.` }] }],
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`);
+      }
+
+      const data = await response.json();
+      const generatedAnswer = data["candidates"][0]["content"]["parts"][0].text;
+
+      const invalidPhrases = [
+        "Indian law cannot be applied",
+        "Can you please explain your query in detail",
+        "insufficient",
+        "invalid question",
+        "not applicable"
+      ];
+
+      const isValidAnswer = !invalidPhrases.some(phrase => generatedAnswer.includes(phrase));
+
+      if (isValidAnswer) {
+        newtranscript(generatedAnswer);
+        storeNewQuestionInDB(question, generatedAnswer); // Store valid answer in DB
+      } else {
+        newtranscript("Can you please explain your query in more detail so I can generate a response for you?");
+      }
+
+    } catch (error) {
+      console.error('Error fetching data from Gemini API:', error);
+      newtranscript("I encountered an error while trying to generate an answer.");
+    }
+  }
+
+  async function storeNewQuestionInDB(question, answer) {
+    try {
+      const response = await fetch(process.env.REACT_APP_SERVER_URL+'/data', { 
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question, answer, category: "Gen-Ai" }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error storing new question and answer.');
+      }
+    } catch (error) {
+      console.error('Error storing question and answer:', error);
+    }
+  }
 
   const handleSearch = () => {
     setInputSource('text');
@@ -24,7 +85,7 @@ export default function VoiceAssistant(props) {
 
   const { transcript, listening, resetTranscript, browserSupportsSpeechRecognition } = useSpeechRecognition({ onEnd: () => submit() });
   const [mytranscript, newtranscript] = useState(transcript);
-  const { speak } = useSpeechSynthesis();
+  const { speak, voices } = useSpeechSynthesis();
 
   function calculateMatchingWords(str1, str2) {
     const words1 = str1.toLowerCase().split(' ');
@@ -40,27 +101,30 @@ export default function VoiceAssistant(props) {
 
   function findanswer(transcript) {
     if (jsonData && jsonData.length > 0) {
-      let maxMatchCount = 0;
-      let bestMatchQuestion = null;
+      let bestMatch = null;
+      let highestSimilarity = 0;
       const lowerCaseInput = transcript.toLowerCase();
+  
       for (const question of jsonData) {
-        const matchCount = calculateMatchingWords(lowerCaseInput, question.question);
-        if (matchCount > maxMatchCount) {
-          maxMatchCount = matchCount;
-          bestMatchQuestion = question;
+        const similarity = stringSimilarity.compareTwoStrings(lowerCaseInput, question.question.toLowerCase());
+  
+        if (similarity > highestSimilarity) {
+          highestSimilarity = similarity;
+          bestMatch = question;
         }
       }
-      if (bestMatchQuestion) {
-        console.log("Answer: ", bestMatchQuestion.answer);
-        newtranscript(bestMatchQuestion.answer);
+  
+      const similarityThreshold = 0.5;
+  
+      if (highestSimilarity >= similarityThreshold) {
+        console.log("Answer from DB:", bestMatch.answer);
+        newtranscript(bestMatch.answer); 
+      } else {
+        console.log("Querying Gemini API due to low similarity:", highestSimilarity);
+        generateAnswer(transcript);
       }
-      else {
-        console.log("Unfortunately, I couldn't find a relevant answer to your query.");
-        newtranscript("Unfortunately, I couldn't find a relevant answer to your query.");
-      }
-    }
-    else {
-      console.log("Unfortunately, I couldn't find a relevant answer to your query.");
+    } else {
+      console.log("No questions in the database.");
       newtranscript("Unfortunately, I couldn't find a relevant answer to your query.");
     }
   }
@@ -74,7 +138,6 @@ export default function VoiceAssistant(props) {
       SpeechRecognition.stopListening();
     } else {
       SpeechRecognition.startListening({ continuous: true });
-      // If starting listening for the second time, reset the right div
       if (transcript) {
         newtranscript('');
         resetTranscript();
@@ -112,7 +175,6 @@ export default function VoiceAssistant(props) {
         <div className="row" style={{ background: "linear-gradient(90deg, rgba(0,120,183,1) 0%, rgba(7,24,68,1) 100%)" }}>
           <div className="col-lg-4 col-md-6 col-sm-12 d-flex flex-column align-items-center justify-content-center" style={{ minHeight: "85vh" }}>
 
-            {/* Adjusted the image size here */}
             <img src={char} alt='our char' className="img-fluid" style={{ maxWidth: '90vw' }} />
             <div className="text-center">
               <button className="btn btn-success" onClick={clicks} style={{ borderRadius: '50%', marginRight: '10px' }}>
@@ -158,7 +220,7 @@ export default function VoiceAssistant(props) {
                   <>
                     {mytranscript}
                     {repeatButton && <div className="d-grid gap-2 col-2 mx-auto text-center position-absolute bottom-0 end-0">
-                      <button className="btn btn-primary"  onClick={() => speak({ text: mytranscript })} type="button"><span class="material-symbols-outlined">
+                      <button className="btn btn-primary" onClick={() => speak({ text: mytranscript })} type="button"><span className="material-symbols-outlined">
                         text_to_speech
                       </span></button>
                     </div>}
